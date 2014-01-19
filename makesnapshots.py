@@ -20,7 +20,6 @@
 
 from boto.ec2.connection import EC2Connection
 from boto.ec2.regioninfo import RegionInfo
-import boto.sns
 from datetime import datetime
 import time
 import sys
@@ -67,7 +66,6 @@ aws_access_key = config['aws_access_key']
 aws_secret_key = config['aws_secret_key']
 ec2_region_name = config['ec2_region_name']
 ec2_region_endpoint = config['ec2_region_endpoint']
-arn= config['arn']
 proxyHost = config['proxyHost']
 proxyPort = config['proxyPort']
 
@@ -87,14 +85,6 @@ if proxyHost == '':
 else:
 	# proxy:
 	conn = EC2Connection(aws_access_key,aws_secret_key,region=region,proxy=proxyHost, proxy_port=proxyPort)
-
-# Connect to SNS
-if proxyHost == '':
-	# non proxy:
-	sns = boto.sns.connect_to_region(ec2_region_name,aws_access_key_id=aws_access_key,aws_secret_access_key=aws_secret_key)
-else:
-	# proxy:
-	sns = boto.sns.connect_to_region(ec2_region_name,aws_access_key_id=aws_access_key,aws_secret_access_key=aws_secret_key,proxy=proxyHost, proxy_port=proxyPort)
 
 
 vols = conn.get_all_volumes(filters={config['tag_name']: config['tag_value']})
@@ -165,7 +155,4 @@ print '\n' + message + '\n'
 print result
 
 #Reporting
-if not errmsg == "":
-	sns.publish(arn,'Error in processing volumes: ' + errmsg,'Error with AWS Snapshot') 
-sns.publish(arn,message,'Finished AWS snapshotting')
 logging.info(result)
